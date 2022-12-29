@@ -23,5 +23,12 @@ df4.columns = [colname+"_GLD" for colname in df4.columns]
 df5 = pd.read_csv("CORN.csv", index_col=0)
 df5.columns = [colname+"_CORN" for colname in df5.columns]
 
+#adding returns to dataframe
+df1["Daily_return_SPY"] = df1["Close_SPY"] / df1["Close_SPY"].shift(1) - 1
+df2["Daily_return_AGG"] = df2["Close_AGG"] / df2["Close_AGG"].shift(1) - 1
+df3["Daily_return_USO"] = df3["Close_USO"] / df3["Close_USO"].shift(1) - 1
+df4["Daily_return_GLD"] = df4["Close_GLD"] / df4["Close_GLD"].shift(1) - 1
+df5["Daily_return_CORN"] = df5["Close_CORN"] / df5["Close_CORN"].shift(1) - 1
+
 
 pass
