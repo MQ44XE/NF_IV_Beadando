@@ -30,5 +30,29 @@ df3["Daily_return_USO"] = df3["Close_USO"] / df3["Close_USO"].shift(1) - 1
 df4["Daily_return_GLD"] = df4["Close_GLD"] / df4["Close_GLD"].shift(1) - 1
 df5["Daily_return_CORN"] = df5["Close_CORN"] / df5["Close_CORN"].shift(1) - 1
 
+#gathering returns into one dataframe
+only_returns = pd.DataFrame()
+only_returns["SPY"]=df1["Daily_return_SPY"]
+only_returns["AGG"]=df2["Daily_return_AGG"]
+only_returns["USO"]=df3["Daily_return_USO"]
+only_returns["GLD"]=df4["Daily_return_GLD"]
+only_returns["CORN"]=df5["Daily_return_CORN"]
+
+#filtering nan values due to CORN
+only_returns = only_returns.loc['2010-06-10':]
+
+#mean and var-covar matrix
+meanReturns = np.mean(only_returns, axis=0)
+covReturns = np.cov(only_returns, rowvar=False)
+
+
+RiskFreeRate=0.03
+def minimize_this(weights, meanReturns, covReturns, RiskFreeRate):
+    excess_return = np.matmul(np.array(meanReturns), weights.transpose()) - RiskFreeRate
+    stand_dev = np.sqrt(np.matmul(np.matmul(weights, covReturns), weights.transpose()))
+    negative_sharpe = -(excess_return / stand_dev)
+    return negative_sharpe
+
+#sp.optimize.minimize(function, x0init_guess, args=[], method='', bounds=(), constraints=[])
 
 pass
