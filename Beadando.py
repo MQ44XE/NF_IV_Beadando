@@ -123,7 +123,7 @@ stand_dev=[]
 port_return=[]
 
 start_date_int = 1261
-end_date_int = 1400
+end_date_int = 4021
 
 for i in range(start_date_int,end_date_int):
     [a,b,c,d]=csuszo_ablak(only_returns, yield_curve, dates[i-(5*252)], dates[i])
@@ -205,17 +205,34 @@ def csuszo_ablak_mdd(only_returns, start_date, end_date):
     return [optimization_mdd.fun, optimization_mdd.x, stand_dev_mdd, port_return_mdd]
 
 #egész időszakra vonatkozó mdd optimalizáció
-[mdd_full_timeline, mdd_weights,c,d] = csuszo_ablak_mdd(only_returns,dates[1],dates[len(dates)-1])
+[mdd_full_timeline, mdd_weights,c,d] = csuszo_ablak_mdd(only_returns,dates[0],dates[len(dates)-1])
 
 #egész időszakra vonatkozó mdd optimalizáció PLOTOLÁS
 mdd_port_columnwise = only_returns*mdd_weights
 mdd_port=mdd_port_columnwise.sum(axis=1)
-mdd_port_index=(1+mdd_port).cumprod()
-mdd_port_peaks=mdd_port_index.cummax()
-mdd_drawdown=(mdd_port_index-mdd_port_peaks)/mdd_port_peaks
+mdd_port_index = pd.DataFrame((1+mdd_port).cumprod())
+mdd_port_peaks = pd.DataFrame(mdd_port_index.cummax())
+mdd_drawdown = pd.DataFrame((mdd_port_index-mdd_port_peaks)/mdd_port_peaks)
+
+mdd_port_index.columns = ["Portfolio Index"]
 mdd_port_index.plot()
+plt.title("Index of the Portfolio")
+plt.xlabel("Dates")
+plt.ylabel("Cum. return")
+figure = plt.gcf()
+figure.set_size_inches(10, 8)
+plt.savefig("index_of_portfolio.png", dpi=100)
 plt.show()
+
+
+mdd_drawdown.columns = ["Portfolio Drawdown"]
 mdd_drawdown.plot()
+plt.title("Drawdown of the Portfolio")
+plt.xlabel("Dates")
+plt.ylabel("Percentage")
+figure = plt.gcf()
+figure.set_size_inches(10, 8)
+plt.savefig("drawdown_of_portfolio.png", dpi=100)
 plt.show()
 
 maximum_drawdown=[]
@@ -240,7 +257,41 @@ plt.xlabel("Dates")
 plt.ylabel("Weights")
 figure = plt.gcf()
 figure.set_size_inches(10, 8)
-#plt.savefig("weights.png", dpi=100)
+plt.savefig("weights_mdd.png", dpi=100)
+plt.show()
+
+df_maximum_drawdown_mdd = pd.DataFrame(maximum_drawdown)
+df_maximum_drawdown_mdd.columns = ["Maximum Drawdown"]
+df_maximum_drawdown_mdd.index = dates[start_date_int:end_date_int]
+df_maximum_drawdown_mdd.plot()
+plt.title("Maximum Drawdown in Portfolio /w MDD")
+plt.xlabel("Dates")
+plt.ylabel("Percentage")
+figure = plt.gcf()
+figure.set_size_inches(10, 8)
+plt.savefig("maximum_drawdown.png", dpi=100)
+plt.show()
+
+df_stand_dev_mdd = pd.DataFrame(stand_dev_mdd)
+df_stand_dev_mdd.index = dates[start_date_int:end_date_int]
+df_stand_dev_mdd.columns = ["σ"]
+df_stand_dev_mdd.plot()
+plt.title("Daily Standard Deviation of the Portfolio /w MDD")
+plt.xlabel("Dates")
+figure = plt.gcf()
+figure.set_size_inches(10, 8)
+plt.savefig("Portfolio Daily Std.Dev mdd.png", dpi=100)
+plt.show()
+
+df_port_return_mdd = pd.DataFrame(port_return_mdd)
+df_port_return_mdd.index = dates[start_date_int:end_date_int]
+df_port_return_mdd.columns = ["r"]
+df_port_return_mdd.plot()
+plt.title("Daily Returns of the Portfolio /w MDD")
+plt.xlabel("Dates")
+figure = plt.gcf()
+figure.set_size_inches(10, 8)
+plt.savefig("port_daily_return_mdd.png", dpi=100)
 plt.show()
 
 pass
