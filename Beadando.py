@@ -55,6 +55,7 @@ RiskFree = yield_curve["close"]
 RiskFree = RiskFree.loc['2007-01-08':]
 RiskFreeMeanDaily = np.mean(RiskFree)/252
 
+# Sharpe mutató maximalizálás
 def minimize_this(weights, meanReturns, covReturns, RiskFreeMeanDaily):
     excess_return = np.matmul(np.array(meanReturns), weights.transpose()) - RiskFreeMeanDaily
     stand_dev = np.sqrt(np.matmul(np.matmul(weights, covReturns), weights.transpose()))
@@ -77,6 +78,7 @@ optimization = optimize.minimize(minimize_this, x0=x0, args=(meanReturns, covRet
 print(optimization.fun*np.sqrt(252))
 print(optimization.x)
 
+# Csúszóablak függvény
 def csuszo_ablak(only_returns, yield_curve, start_date, end_date):
 
     only_returns = only_returns.loc[start_date:end_date]
@@ -114,7 +116,7 @@ dates=only_returns.index
 #print(dates[1258:])
 print(csuszo_ablak(only_returns,yield_curve,'2007-01-08','2012-01-08'))
 
-#5 éves csúszóablak
+# 5 éves csúszóablak
 sharpes=[]
 w=[]
 stand_dev=[]
@@ -130,33 +132,41 @@ for i in range(start_date_int,end_date_int):
     stand_dev.append(c)
     port_return.append(d)
 
-print()
+# Sharpe csúszóablak plot
+
 df_weights = pd.DataFrame(w)
 df_weights.columns = ["SPY","AGG","USO","GLD","DBA"]
 df_weights.index = dates[start_date_int:end_date_int]
-df_weights.columns.names = ["Weights"]
+df_weights.columns.names = ["ETFs"]
 df_weights.plot()
+plt.title("Weights of ETFs in Portfolio")
+plt.xlabel("Dates")
+plt.ylabel("Weights")
 figure = plt.gcf()
 figure.set_size_inches(10, 8)
-plt.savefig("weights.png", dpi=100)
+#plt.savefig("weights.png", dpi=100)
 plt.show()
 
 df_std = pd.DataFrame(stand_dev)
 df_std.index = dates[start_date_int:end_date_int]
-df_std.columns = ["Portfolio Daily Std.Dev."]
+df_std.columns = ["σ"]
 df_std.plot()
+plt.title("Daily Standard Deviation of the Portfolio")
+plt.xlabel("Dates")
 figure = plt.gcf()
 figure.set_size_inches(10, 8)
-plt.savefig("Portfolio Daily Std.Dev.png", dpi=100)
+#plt.savefig("Portfolio Daily Std.Dev.png", dpi=100)
 plt.show()
 
 df_ptfret = pd.DataFrame(port_return)
 df_ptfret.index = dates[start_date_int:end_date_int]
-df_ptfret.columns = ["Portfolio Daily Return"]
+df_ptfret.columns = ["r"]
 df_ptfret.plot()
+plt.title("Daily Returns of the Portfolio")
+plt.xlabel("Dates")
 figure = plt.gcf()
 figure.set_size_inches(10, 8)
-plt.savefig("port_daily_return.png", dpi=100)
+#plt.savefig("port_daily_return.png", dpi=100)
 plt.show()
 
 pass
