@@ -40,15 +40,14 @@ only_returns["GLD"]=df4["Daily_return_GLD"]
 only_returns["CORN"]=df5["Daily_return_CORN"]
 
 #filtering nan values due to CORN
-only_returns = only_returns.loc['2010-06-10':]*100
+only_returns = only_returns.loc['2010-06-10':]
 
 #mean and var-covar matrix
 meanReturns = np.mean(only_returns, axis=0)
 covReturns = np.cov(only_returns, rowvar=False)
 
 RiskFreeRate=0.03
-RF_daily=(1+RiskFreeRate)**(1/252)-1
-RF_daily=RF_daily*100
+RF_daily=RiskFreeRate/252
 
 def minimize_this(weights, meanReturns, covReturns, RF_daily):
     excess_return = np.matmul(np.array(meanReturns), weights.transpose()) - RF_daily
@@ -69,7 +68,7 @@ for i in range(5):
     bounds.append((0,1))
 
 optimization = optimize.minimize(minimize_this, x0=x0, args=(meanReturns, covReturns, RF_daily), method='SLSQP', bounds=bounds, constraints=cons, tol=10 ** -3)
-print(optimization.fun)
+print(optimization.fun*np.sqrt(252))
 print(optimization.x)
 
 pass
