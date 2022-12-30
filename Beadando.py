@@ -123,7 +123,7 @@ stand_dev=[]
 port_return=[]
 
 start_date_int = 1261
-end_date_int = 4022
+end_date_int = 1400
 
 for i in range(start_date_int,end_date_int):
     [a,b,c,d]=csuszo_ablak(only_returns, yield_curve, dates[i-(5*252)], dates[i])
@@ -167,6 +167,80 @@ plt.xlabel("Dates")
 figure = plt.gcf()
 figure.set_size_inches(10, 8)
 #plt.savefig("port_daily_return.png", dpi=100)
+plt.show()
+
+#####
+#Maximum Drawdown
+#####
+
+#csúszó ablakos mdd optimalizáció
+def csuszo_ablak_mdd(only_returns, start_date, end_date):
+    only_returns = only_returns.loc[start_date:end_date]
+    def minimize_this_mdd(weights, only_returns):
+        portfolio_columnwise = only_returns * weights
+        portfolio = pd.DataFrame()
+        portfolio["Total"] = portfolio_columnwise.sum(axis=1)
+        port_index = (1 + portfolio).cumprod()
+        port_peaks = port_index.cummax()
+        drawdown = (port_index - port_peaks) / port_peaks
+        return -drawdown.min()
+    def constraint_mdd(weights):
+        sum = 0
+        for weight in weights:
+            sum = sum + weight
+        return sum - 1
+
+    bounds_mdd = []
+    x0_mdd = np.array([0.2, 0.2, 0.2, 0.2, 0.2])
+    cons_mdd = ({'type': 'eq', 'fun': constraint_mdd})
+    for i in range(5):
+        bounds_mdd.append((0, 1))
+
+    optimization_mdd = optimize.minimize(minimize_this_mdd, x0=x0_mdd, args=(only_returns), method='SLSQP', bounds=bounds_mdd, constraints=cons_mdd, tol=10 ** -3)
+
+    meanReturns = np.mean(only_returns, axis=0)
+    covReturns = np.cov(only_returns, rowvar=False)
+    stand_dev_mdd = np.sqrt(np.matmul(np.matmul(optimization_mdd.x, covReturns), optimization_mdd.x.transpose()))
+    port_return_mdd = np.matmul(np.array(meanReturns), optimization_mdd.x.transpose())
+    return [optimization_mdd.fun, optimization_mdd.x, stand_dev_mdd, port_return_mdd]
+
+#egész időszakra vonatkozó mdd optimalizáció
+[mdd_full_timeline, mdd_weights,c,d] = csuszo_ablak_mdd(only_returns,dates[1],dates[len(dates)-1])
+
+#egész időszakra vonatkozó mdd optimalizáció PLOTOLÁS
+mdd_port_columnwise = only_returns*mdd_weights
+mdd_port=mdd_port_columnwise.sum(axis=1)
+mdd_port_index=(1+mdd_port).cumprod()
+mdd_port_peaks=mdd_port_index.cummax()
+mdd_drawdown=(mdd_port_index-mdd_port_peaks)/mdd_port_peaks
+mdd_port_index.plot()
+plt.show()
+mdd_drawdown.plot()
+plt.show()
+
+maximum_drawdown=[]
+w_mdd=[]
+stand_dev_mdd=[]
+port_return_mdd=[]
+
+for i in range(start_date_int,end_date_int):
+    [a,b,c,d]=csuszo_ablak_mdd(only_returns, dates[i-(5*252)], dates[i])
+    maximum_drawdown.append(a)
+    w_mdd.append(b)
+    stand_dev_mdd.append(c)
+    port_return_mdd.append(d)
+
+df_weights_mdd = pd.DataFrame(w_mdd)
+df_weights_mdd.columns = ["SPY","AGG","USO","GLD","DBA"]
+df_weights_mdd.index = dates[start_date_int:end_date_int]
+df_weights_mdd.columns.names = ["ETFs"]
+df_weights_mdd.plot()
+plt.title("Weights of ETFs in Portfolio /w MDD")
+plt.xlabel("Dates")
+plt.ylabel("Weights")
+figure = plt.gcf()
+figure.set_size_inches(10, 8)
+#plt.savefig("weights.png", dpi=100)
 plt.show()
 
 pass
