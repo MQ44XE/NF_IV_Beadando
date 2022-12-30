@@ -4,6 +4,7 @@ print("Szia Máté!")
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy import optimize
 
 # 5 multi asset:
     # equity = SPY
@@ -45,14 +46,27 @@ only_returns = only_returns.loc['2010-06-10':]
 meanReturns = np.mean(only_returns, axis=0)
 covReturns = np.cov(only_returns, rowvar=False)
 
-
 RiskFreeRate=0.03
-def minimize_this(weights, meanReturns, covReturns, RiskFreeRate):
-    excess_return = np.matmul(np.array(meanReturns), weights.transpose()) - RiskFreeRate
+RF_daily=(1+RiskFreeRate)**(1/252)-1
+def minimize_this(weights, meanReturns, covReturns, RF_daily):
+    excess_return = np.matmul(np.array(meanReturns), weights.transpose()) - RF_daily
     stand_dev = np.sqrt(np.matmul(np.matmul(weights, covReturns), weights.transpose()))
     negative_sharpe = -(excess_return / stand_dev)
     return negative_sharpe
 
-#sp.optimize.minimize(function, x0init_guess, args=[], method='', bounds=(), constraints=[])
+def constraint(weights):
+    sum = 0
+    for weight in weights:
+        sum = sum + weight
+    return sum - 1
+
+bounds=[]
+x0 = np.array([0.2,0.2,0.2,0.2,0.2])
+cons = ({'type': 'eq', 'fun': constraint})
+for i in range(5):
+    bounds.append((0,1))
+
+optimization = optimize.minimize(minimize_this, x0=x0, args=(meanReturns, covReturns, RF_daily), method='SLSQP', bounds=bounds, constraints=cons, tol=10 ** -3)
+print(optimization)
 
 pass
