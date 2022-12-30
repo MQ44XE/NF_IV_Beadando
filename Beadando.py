@@ -81,14 +81,13 @@ def csuszo_ablak(only_returns, yield_curve, start_date, end_date):
     only_returns = only_returns.loc[start_date:end_date]
     yield_curve = yield_curve.loc[start_date:end_date]
 
+    RiskFree = yield_curve["close"]
+    RiskFreeMeanDaily = np.mean(RiskFree) / 252
     meanReturns = np.mean(only_returns, axis=0)
-    meanYC = np.mean(yield_curve, axis=0)
     covReturns = np.cov(only_returns, rowvar=False)
 
-    RF_daily = meanYC / 252
-
-    def minimize_this_cs(weights, meanReturns, covReturns, RF_daily):
-        excess_return = np.matmul(np.array(meanReturns), weights.transpose()) - RF_daily
+    def minimize_this_cs(weights, meanReturns, covReturns, RiskFreeMeanDaily):
+        excess_return = np.matmul(np.array(meanReturns), weights.transpose()) - RiskFreeMeanDaily
         stand_dev = np.sqrt(np.matmul(np.matmul(weights, covReturns), weights.transpose()))
         negative_sharpe = -(excess_return / stand_dev)
         return negative_sharpe
@@ -101,16 +100,16 @@ def csuszo_ablak(only_returns, yield_curve, start_date, end_date):
 
     bounds = []
     x0 = np.array([0.2, 0.2, 0.2, 0.2, 0.2])
-    cons = ({'type': 'eq', 'fun': constraint})
+    cons = ({'type': 'eq', 'fun': constraint_cs})
     for i in range(5):
         bounds.append((0, 1))
 
-    optimization = optimize.minimize(minimize_this, x0=x0, args=(meanReturns, covReturns, RF_daily), method='SLSQP',
-                                     bounds=bounds, constraints=cons, tol=10 ** -3)
-    return [optimization.fun, optimization.x]
+    optimization = optimize.minimize(minimize_this_cs, x0=x0, args=(meanReturns, covReturns, RiskFreeMeanDaily), method='SLSQP', bounds=bounds, constraints=cons, tol=10 ** -3)
+    return [optimization.fun*np.sqrt(252), optimization.x]
+    #return optimization.fun * np.sqrt(252)
 
 dates=only_returns.index
 #print(dates[1258:])
-
+print(csuszo_ablak(only_returns,yield_curve,'2010-06-10','2015-06-10'))
 
 pass
