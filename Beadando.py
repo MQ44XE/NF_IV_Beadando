@@ -115,13 +115,15 @@ print(csuszo_ablak(only_returns,yield_curve,'2007-01-08','2012-01-08'))
 #5 éves csúszóablak
 sharpes=[]
 w=[]
-for i in range(1261,1400):
-    sharpes.append(csuszo_ablak(only_returns, yield_curve, dates[i-1261], dates[i])[0])
-    w.append(csuszo_ablak(only_returns, yield_curve, dates[i-1261], dates[i])[1])
+for i in range(3361,3800):
+    sharpes.append(csuszo_ablak(only_returns, yield_curve, dates[i-(5*252)], dates[i])[0])
+    w.append(csuszo_ablak(only_returns, yield_curve, dates[i-(5*252)], dates[i])[1])
 
 print()
 df_weights = pd.DataFrame(w)
-df_sharpes = pd.DataFrame(sharpes)
+df_weights.columns = ["SPY","AGG","USO","GLD","DBA"]
+df_weights.index = dates[3361:3800]
+df_weights.columns.names = ["Weights"]
 df_weights.plot()
 plt.show()
 pass
