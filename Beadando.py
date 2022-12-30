@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import optimize
+import csv
 
 # 5 multi asset:
     # equity = SPY
@@ -106,10 +107,16 @@ def csuszo_ablak(only_returns, yield_curve, start_date, end_date):
 
     optimization = optimize.minimize(minimize_this_cs, x0=x0, args=(meanReturns, covReturns, RiskFreeMeanDaily), method='SLSQP', bounds=bounds, constraints=cons, tol=10 ** -3)
     return [optimization.fun*np.sqrt(252), optimization.x]
-    #return optimization.fun * np.sqrt(252)
 
 dates=only_returns.index
 #print(dates[1258:])
 print(csuszo_ablak(only_returns,yield_curve,'2007-01-08','2012-01-08'))
+
+#5 éves csúszóablak
+sharpes=[]
+w=[]
+for i in range(1261,1400):
+    sharpes.append(csuszo_ablak(only_returns, yield_curve, dates[i-1261], dates[i])[0])
+    w.append(csuszo_ablak(only_returns, yield_curve, dates[i-1261], dates[i])[1])
 
 pass
