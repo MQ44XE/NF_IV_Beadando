@@ -25,11 +25,11 @@ df5 = pd.read_csv("CORN.csv", index_col=0)
 df5.columns = [colname+"_CORN" for colname in df5.columns]
 
 #adding returns to dataframe
-df1["Daily_return_SPY"] = df1["Close_SPY"] / df1["Close_SPY"].shift(1) - 1
-df2["Daily_return_AGG"] = df2["Close_AGG"] / df2["Close_AGG"].shift(1) - 1
-df3["Daily_return_USO"] = df3["Close_USO"] / df3["Close_USO"].shift(1) - 1
-df4["Daily_return_GLD"] = df4["Close_GLD"] / df4["Close_GLD"].shift(1) - 1
-df5["Daily_return_CORN"] = df5["Close_CORN"] / df5["Close_CORN"].shift(1) - 1
+df1["Daily_return_SPY"] = df1["Adj Close_SPY"] / df1["Adj Close_SPY"].shift(1) - 1
+df2["Daily_return_AGG"] = df2["Adj Close_AGG"] / df2["Adj Close_AGG"].shift(1) - 1
+df3["Daily_return_USO"] = df3["Adj Close_USO"] / df3["Adj Close_USO"].shift(1) - 1
+df4["Daily_return_GLD"] = df4["Adj Close_GLD"] / df4["Adj Close_GLD"].shift(1) - 1
+df5["Daily_return_CORN"] = df5["Adj Close_CORN"] / df5["Adj Close_CORN"].shift(1) - 1
 
 #gathering returns into one dataframe
 only_returns = pd.DataFrame()
@@ -40,7 +40,7 @@ only_returns["GLD"]=df4["Daily_return_GLD"]
 only_returns["CORN"]=df5["Daily_return_CORN"]
 
 #filtering nan values due to CORN
-only_returns = only_returns.loc['2010-06-10':]
+only_returns = only_returns.loc['2010-06-10':]*100
 
 #mean and var-covar matrix
 meanReturns = np.mean(only_returns, axis=0)
@@ -48,6 +48,8 @@ covReturns = np.cov(only_returns, rowvar=False)
 
 RiskFreeRate=0.03
 RF_daily=(1+RiskFreeRate)**(1/252)-1
+RF_daily=RF_daily*100
+
 def minimize_this(weights, meanReturns, covReturns, RF_daily):
     excess_return = np.matmul(np.array(meanReturns), weights.transpose()) - RF_daily
     stand_dev = np.sqrt(np.matmul(np.matmul(weights, covReturns), weights.transpose()))
@@ -67,6 +69,7 @@ for i in range(5):
     bounds.append((0,1))
 
 optimization = optimize.minimize(minimize_this, x0=x0, args=(meanReturns, covReturns, RF_daily), method='SLSQP', bounds=bounds, constraints=cons, tol=10 ** -3)
-print(optimization)
+print(optimization.fun)
+print(optimization.x)
 
 pass
