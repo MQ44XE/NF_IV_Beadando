@@ -106,7 +106,9 @@ def csuszo_ablak(only_returns, yield_curve, start_date, end_date):
         bounds.append((0, 1))
 
     optimization = optimize.minimize(minimize_this_cs, x0=x0, args=(meanReturns, covReturns, RiskFreeMeanDaily), method='SLSQP', bounds=bounds, constraints=cons, tol=10 ** -3)
-    return [optimization.fun*np.sqrt(252), optimization.x]
+    stand_dev = np.sqrt(np.matmul(np.matmul(optimization.x, covReturns), optimization.x.transpose()))
+    port_return=np.matmul(np.array(meanReturns), optimization.x.transpose())
+    return [optimization.fun*np.sqrt(252), optimization.x, stand_dev, port_return]
 
 dates=only_returns.index
 #print(dates[1258:])
@@ -115,14 +117,19 @@ print(csuszo_ablak(only_returns,yield_curve,'2007-01-08','2012-01-08'))
 #5 éves csúszóablak
 sharpes=[]
 w=[]
-for i in range(3361,3800):
-    sharpes.append(csuszo_ablak(only_returns, yield_curve, dates[i-(5*252)], dates[i])[0])
-    w.append(csuszo_ablak(only_returns, yield_curve, dates[i-(5*252)], dates[i])[1])
+stand_dev=[]
+port_return=[]
+for i in range(1261,1400):
+    [a,b,c,d]=csuszo_ablak(only_returns, yield_curve, dates[i-(5*252)], dates[i])
+    sharpes.append(a)
+    w.append(b)
+    stand_dev.append(c)
+    port_return.append(d)
 
 print()
 df_weights = pd.DataFrame(w)
 df_weights.columns = ["SPY","AGG","USO","GLD","DBA"]
-df_weights.index = dates[3361:3800]
+df_weights.index = dates[1261:1400]
 df_weights.columns.names = ["Weights"]
 df_weights.plot()
 plt.show()
