@@ -119,4 +119,9 @@ for i in range(1261,1400):
     sharpes.append(csuszo_ablak(only_returns, yield_curve, dates[i-1261], dates[i])[0])
     w.append(csuszo_ablak(only_returns, yield_curve, dates[i-1261], dates[i])[1])
 
+print()
+df_weights = pd.DataFrame(w)
+df_sharpes = pd.DataFrame(sharpes)
+df_weights.plot()
+plt.show()
 pass
