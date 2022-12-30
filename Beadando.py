@@ -119,7 +119,11 @@ sharpes=[]
 w=[]
 stand_dev=[]
 port_return=[]
-for i in range(1261,1400):
+
+start_date_int = 1261
+end_date_int = 1400
+
+for i in range(start_date_int,end_date_int):
     [a,b,c,d]=csuszo_ablak(only_returns, yield_curve, dates[i-(5*252)], dates[i])
     sharpes.append(a)
     w.append(b)
@@ -129,8 +133,21 @@ for i in range(1261,1400):
 print()
 df_weights = pd.DataFrame(w)
 df_weights.columns = ["SPY","AGG","USO","GLD","DBA"]
-df_weights.index = dates[1261:1400]
+df_weights.index = dates[start_date_int:end_date_int]
 df_weights.columns.names = ["Weights"]
 df_weights.plot()
 plt.show()
+
+df_std = pd.DataFrame(stand_dev)
+df_std.index = dates[start_date_int:end_date_int]
+df_std.columns = ["Portfolio Std.Dev."]
+df_std.plot()
+plt.show()
+
+df_ptfret = pd.DataFrame(port_return)
+df_ptfret.index = dates[start_date_int:end_date_int]
+df_ptfret.columns = ["Portfolio Return"]
+df_ptfret.plot()
+plt.show()
+
 pass
