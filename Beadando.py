@@ -21,8 +21,8 @@ df3 = pd.read_csv("USO.csv", index_col=0)
 df3.columns = [colname+"_USO" for colname in df3.columns]
 df4 = pd.read_csv("GLD.csv", index_col=0)
 df4.columns = [colname+"_GLD" for colname in df4.columns]
-df5 = pd.read_csv("CORN.csv", index_col=0)
-df5.columns = [colname+"_CORN" for colname in df5.columns]
+df5 = pd.read_csv("DBA.csv", index_col=0)
+df5.columns = [colname+"_DBA" for colname in df5.columns]
 yield_curve = pd.read_csv("yield-curve.csv", index_col=0)
 
 #adding returns to dataframe
@@ -30,7 +30,7 @@ df1["Daily_return_SPY"] = df1["Adj Close_SPY"] / df1["Adj Close_SPY"].shift(1) -
 df2["Daily_return_AGG"] = df2["Adj Close_AGG"] / df2["Adj Close_AGG"].shift(1) - 1
 df3["Daily_return_USO"] = df3["Adj Close_USO"] / df3["Adj Close_USO"].shift(1) - 1
 df4["Daily_return_GLD"] = df4["Adj Close_GLD"] / df4["Adj Close_GLD"].shift(1) - 1
-df5["Daily_return_CORN"] = df5["Adj Close_CORN"] / df5["Adj Close_CORN"].shift(1) - 1
+df5["Daily_return_DBA"] = df5["Adj Close_DBA"] / df5["Adj Close_DBA"].shift(1) - 1
 
 
 #gathering returns into one dataframe
@@ -39,10 +39,10 @@ only_returns["SPY"]=df1["Daily_return_SPY"]
 only_returns["AGG"]=df2["Daily_return_AGG"]
 only_returns["USO"]=df3["Daily_return_USO"]
 only_returns["GLD"]=df4["Daily_return_GLD"]
-only_returns["CORN"]=df5["Daily_return_CORN"]
+only_returns["DBA"]=df5["Daily_return_DBA"]
 
-#filtering nan values due to CORN
-only_returns = only_returns.loc['2010-06-10':]
+#filtering nan values due to DBA
+only_returns = only_returns.loc['2007-01-08':]
 
 #mean and var-covar matrix
 meanReturns = np.mean(only_returns, axis=0)
@@ -51,7 +51,7 @@ covReturns = np.cov(only_returns, rowvar=False)
 
 # USD Govt yield curve 3 month
 RiskFree = yield_curve["close"]
-RiskFree = RiskFree.loc['2010-06-10':]
+RiskFree = RiskFree.loc['2007-01-08':]
 RiskFreeMeanDaily = np.mean(RiskFree)/252
 
 def minimize_this(weights, meanReturns, covReturns, RiskFreeMeanDaily):
@@ -110,6 +110,6 @@ def csuszo_ablak(only_returns, yield_curve, start_date, end_date):
 
 dates=only_returns.index
 #print(dates[1258:])
-print(csuszo_ablak(only_returns,yield_curve,'2010-06-10','2015-06-10'))
+print(csuszo_ablak(only_returns,yield_curve,'2007-01-08','2012-01-08'))
 
 pass
