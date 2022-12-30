@@ -121,7 +121,7 @@ stand_dev=[]
 port_return=[]
 
 start_date_int = 1261
-end_date_int = 1400
+end_date_int = 4022
 
 for i in range(start_date_int,end_date_int):
     [a,b,c,d]=csuszo_ablak(only_returns, yield_curve, dates[i-(5*252)], dates[i])
@@ -136,18 +136,27 @@ df_weights.columns = ["SPY","AGG","USO","GLD","DBA"]
 df_weights.index = dates[start_date_int:end_date_int]
 df_weights.columns.names = ["Weights"]
 df_weights.plot()
+figure = plt.gcf()
+figure.set_size_inches(10, 8)
+plt.savefig("weights.png", dpi=100)
 plt.show()
 
 df_std = pd.DataFrame(stand_dev)
 df_std.index = dates[start_date_int:end_date_int]
-df_std.columns = ["Portfolio Std.Dev."]
+df_std.columns = ["Portfolio Daily Std.Dev."]
 df_std.plot()
+figure = plt.gcf()
+figure.set_size_inches(10, 8)
+plt.savefig("Portfolio Daily Std.Dev.png", dpi=100)
 plt.show()
 
 df_ptfret = pd.DataFrame(port_return)
 df_ptfret.index = dates[start_date_int:end_date_int]
-df_ptfret.columns = ["Portfolio Return"]
+df_ptfret.columns = ["Portfolio Daily Return"]
 df_ptfret.plot()
+figure = plt.gcf()
+figure.set_size_inches(10, 8)
+plt.savefig("port_daily_return.png", dpi=100)
 plt.show()
 
 pass
