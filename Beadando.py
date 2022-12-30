@@ -11,7 +11,7 @@ from scipy import optimize
     # fixed income = AGG
     # commodity energy = USO
     # commodity raw materials = GLD
-    # commodity food = CORN
+    # commodity food = DBA
 
 df1 = pd.read_csv("SPY.csv", index_col=0)
 df1.columns = [colname+"_SPY" for colname in df1.columns]
