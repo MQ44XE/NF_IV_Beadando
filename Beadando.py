@@ -49,7 +49,6 @@ only_returns = only_returns.loc['2007-01-08':]
 meanReturns = np.mean(only_returns, axis=0)
 covReturns = np.cov(only_returns, rowvar=False)
 
-
 # USD Govt yield curve 3 month
 RiskFree = yield_curve["close"]
 RiskFree = RiskFree.loc['2007-01-08':]
@@ -75,8 +74,8 @@ for i in range(5):
     bounds.append((0,1))
 
 optimization = optimize.minimize(minimize_this, x0=x0, args=(meanReturns, covReturns, RiskFreeMeanDaily), method='SLSQP', bounds=bounds, constraints=cons, tol=10 ** -3)
-print(optimization.fun*np.sqrt(252))
-print(optimization.x)
+print("A Sharpe optimalizációval kapott egész időszakos portfólió éves sharpe mutatója:", -optimization.fun*np.sqrt(252))
+print("A Sharpe optimalizációval kapott egész időszakos portfólió súlyai:", optimization.x)
 
 # Csúszóablak függvény
 def csuszo_ablak(only_returns, yield_curve, start_date, end_date):
@@ -112,18 +111,15 @@ def csuszo_ablak(only_returns, yield_curve, start_date, end_date):
     port_return=np.matmul(np.array(meanReturns), optimization.x.transpose())
     return [optimization.fun*np.sqrt(252), optimization.x, stand_dev, port_return]
 
-dates=only_returns.index
-#print(dates[1258:])
-print(csuszo_ablak(only_returns,yield_curve,'2007-01-08','2012-01-08'))
-
 # 5 éves csúszóablak
 sharpes=[]
 w=[]
 stand_dev=[]
 port_return=[]
 
-start_date_int = 1261
-end_date_int = 4021
+dates=only_returns.index
+start_date_int = 1261 #2012-09-10
+end_date_int = 1400 #a dátumok indexálásánál a 4022 a vége
 
 for i in range(start_date_int,end_date_int):
     [a,b,c,d]=csuszo_ablak(only_returns, yield_curve, dates[i-(5*252)], dates[i])
@@ -133,7 +129,6 @@ for i in range(start_date_int,end_date_int):
     port_return.append(d)
 
 # Sharpe csúszóablak plot
-
 df_weights = pd.DataFrame(w)
 df_weights.columns = ["SPY","AGG","USO","GLD","DBA"]
 df_weights.index = dates[start_date_int:end_date_int]
@@ -170,7 +165,7 @@ figure.set_size_inches(10, 8)
 plt.show()
 
 #####
-#Maximum Drawdown
+#Maximum Drawdown optimalizálás
 #####
 
 #csúszó ablakos mdd optimalizáció
@@ -224,7 +219,6 @@ figure.set_size_inches(10, 8)
 plt.savefig("index_of_portfolio.png", dpi=100)
 plt.show()
 
-
 mdd_drawdown.columns = ["Portfolio Drawdown"]
 mdd_drawdown.plot()
 plt.title("Drawdown of the Portfolio")
@@ -235,6 +229,7 @@ figure.set_size_inches(10, 8)
 plt.savefig("drawdown_of_portfolio.png", dpi=100)
 plt.show()
 
+#MDD 5 éves csúszóablak
 maximum_drawdown=[]
 w_mdd=[]
 stand_dev_mdd=[]
@@ -247,6 +242,7 @@ for i in range(start_date_int,end_date_int):
     stand_dev_mdd.append(c)
     port_return_mdd.append(d)
 
+#MDD 5 éves csúszóablak PLOTOLÁS
 df_weights_mdd = pd.DataFrame(w_mdd)
 df_weights_mdd.columns = ["SPY","AGG","USO","GLD","DBA"]
 df_weights_mdd.index = dates[start_date_int:end_date_int]
